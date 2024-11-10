@@ -11,11 +11,11 @@ import lombok.ToString;
 public class LoginParam {
 
     @NotBlank(message = "帳戶不為空")
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
-    private String account;
+    // @Pattern(regexp = "^[A-Za-z0-9]+$")
+    private String email;
 
     @NotBlank(message = "密碼不為空")
-    @Size(min = 3,max = 10 ,message = "密碼長度需在3~10之間")
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
+    // @Size(min = 3,max = 10 ,message = "密碼長度需在3~10之間")
+    // @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String password;
 }

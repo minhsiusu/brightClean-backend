@@ -1,15 +1,17 @@
 package com.example.brightClean.repository;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
-
 import com.example.brightClean.domain.Product;
 
 @Repository
+public interface ProductRepository extends JpaRepository<Product,Integer>{
 
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+    public List<Product> findAllByOrderBySalesDesc();
 
-    public List<Product> findAllBySales(int sales, Pageable agable);
+    @Query("SELECT p FROM Product p WHERE p.type = :type")
+    public List<Product> findProductByType(@Param("type") String type);   
 }

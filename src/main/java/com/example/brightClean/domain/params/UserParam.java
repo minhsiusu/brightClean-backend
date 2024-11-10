@@ -17,7 +17,7 @@ public class UserParam {
     private String name;
 
     @NotBlank(message = "帳戶不為空")
-    @Pattern(regexp = "^[A-Za-z0-9]+$")
+    // @Pattern(regexp = "^[A-Za-z0-9]+$")
     private String account;
 
     @NotBlank(message = "密碼不為空")
@@ -26,7 +26,7 @@ public class UserParam {
     private String password;
 
     @NotBlank(message = "信箱不為空")
-    @Email
+    // @Email
     private String email;
 
     @NotBlank(message = "手機不為空")

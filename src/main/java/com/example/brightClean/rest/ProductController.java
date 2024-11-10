@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,37 +21,51 @@ import com.example.brightClean.domain.Product;
 import com.example.brightClean.repository.ProductRepository;
 import com.example.brightClean.service.ProductService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/product")
-@CrossOrigin("http://localhost:8080")
+@Tag(name = "product")
 public class ProductController {
-
+    
     @Autowired
     private ProductService productService;
 
     @Autowired
     private ProductRepository productRepository;
 
+    
     @GetMapping("/get")
-    public Product getMethodName(@RequestParam("id") int id) {
-        return productService.getProduct(id).get();
+    public Product findProductById(@RequestParam("id") Integer id) {
+        return productService.findProductById(id).get();
     }
-
-    @GetMapping("/getAll")
-    public List<Product> getUsers() {
-        return productService.getAll();
+    
+    @GetMapping("/getall")
+    public List<Product> findProducts(){
+        return productService.findProducts();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Product> postMethodName(@RequestBody Product product) {
+    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().toString());
         return ResponseEntity.created(uri).body(productService.create(product));
     }
 
     @GetMapping("/{page}/{rows}")
-    public List<Product> getAllBySales(@PathVariable("page") int page, @PathVariable("rows") int rows) {
+    public List<Product> findAllBySales(@PathVariable("page") int page, @PathVariable("rows") int rows){
 
-        Pageable pageable = PageRequest.of(page, rows, Sort.by("productId"));
+        Pageable pageable = PageRequest.of(page, rows, Sort.by("id"));
         return productRepository.findAll(pageable).getContent();
     }
+
+    @GetMapping("/gettype")
+    public List<Product> findProductByType(@RequestParam("type") String type) {
+        return productService.findProductsByType(type);
+    }
+    
+    @GetMapping("/getsalses")
+    public List<Product> getAllBySales() {
+        return productService.findProductsBySalses();
+    }
+    
 }

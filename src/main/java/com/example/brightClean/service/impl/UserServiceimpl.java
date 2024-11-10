@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.brightClean.domain.User;
@@ -15,25 +16,20 @@ import com.example.brightClean.service.UserService;
 import io.micrometer.common.lang.NonNull;
 
 @Service
-public class UserServiceimpl implements UserService {
+public class UserServiceimpl implements UserService{
+
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User create(@NonNull User user) {
-        // if(userRepository.findByName(user.getName()) !=null ){
-        // throw new UnsupportedOperationException("有相同的名字");
-        // }
-        // if(userRepository.findByEmail(user.getEmail()) !=null ){
-        // throw new UnsupportedOperationException("有相同的信箱");
-        // }
-        // if(userRepository.findByAccount(user.getAccount()) !=null ){
-        // throw new UnsupportedOperationException("有相同的帳號");
-        // }
-        // if(userRepository.findByCellPhone(user.getCellPhone()) !=null ){
-        // throw new UnsupportedOperationException("有相同的手機號碼");
-        // }
         return userRepository.save(user);
     }
 
@@ -44,48 +40,72 @@ public class UserServiceimpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<User> findUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    public Optional<User> getUser(Integer id) {
+    public Optional<User> findUserById(int id) {
         return userRepository.findById(id);
     }
 
     @Override
-    public Optional<User> getByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     @Override
-    public Optional<User> getByCellPhone(String cellphone) {
+    public Optional<User> findByCellPhone(String cellphone) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getByCellPhone'");
     }
 
     @Override
-    public Optional<User> getByAccount(String account) {
+    public Optional<User> findUserByAccount(String account) {
         return userRepository.findByAccount(account);
     }
 
     @Override
-    public User getByAccountOfNonNull(String account) {
-        return getByAccount(account)
-                .orElseThrow(() -> new NotFoundException("The name does not exist").setErrorData(account));
+    public User findByAccountOfNonNull(String account) {
+        return findUserByAccount(account).orElseThrow(() -> new NotFoundException("The name does not exist").setErrorData(account));
     }
 
     @Override
     public boolean passwordMatch(@org.springframework.lang.NonNull User user, @Nullable String plainPassword) {
         // TODO Auto-generated method stub
-        return user.getPassword().equals(plainPassword);
+        return passwordEncoder.matches(plainPassword, user.getPassword());
     }
 
-    public User findUserById(Integer id) throws Exception {
-        Optional<User> opt = userRepository.findById(id);
-        if (opt.isPresent()) {
-            return opt.get();
+    // @Override
+    // public UserDetails loadUserByUsername(String account) throws UsernameNotFoundException {
+    //     User user=userRepository.findByAccount(account).orElseThrow();
+    //     return (UserDetails) user;
+    // }
+
+    public void createUser(User user) throws Exception {
+        // User isEmailExists = userRepository.findByEmail(user.getEmail()).orElseThrow();
+
+        // if(isEmailExists != null) {
+        //     throw new Exception("Error: Email is already registered.");
+        // }
+
+        User createdUser = new User();
+        createdUser.setName(user.getName());
+        createdUser.setAccount(user.getAccount());
+        createdUser.setEmail(user.getEmail());
+        createdUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        createdUser.setCellphone(user.getCellphone());
+        createdUser.setAddress(user.getAddress());
+
+        userRepository.save(createdUser);
+    }
+
+    public User findUserByJWT(String jwt) throws Exception{
+        String email = jwtService.getEmailFromJWT(jwt);
+        User user = userRepository.findByEmail(email).orElseThrow();
+        if(user == null){
+            throw new Exception("Error: Invalid JWT");
         }
-        throw new Exception("Error: User not found with id: " + id);
+        return user;
     }
 }

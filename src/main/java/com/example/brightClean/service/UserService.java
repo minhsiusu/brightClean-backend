@@ -9,26 +9,30 @@ import org.springframework.lang.Nullable;
 import com.example.brightClean.domain.User;
 
 public interface UserService {
-
+     
     User create(User user);
-
-    Optional<User> getUser(Integer id);
-
-    @NonNull
-    Optional<User> getByAccount(@NonNull String account);
+    
+    Optional<User> findUserById(int id);
 
     @NonNull
-    User getByAccountOfNonNull(@NonNull String account);
+    Optional<User> findUserByAccount(@NonNull String account);
+
+    @NonNull
+    User findByAccountOfNonNull(@NonNull String account);
 
     boolean passwordMatch(@NonNull User user, @Nullable String plainPassword);
 
-    List<User> getUsers();
+    List<User> findUsers();
 
-    void update(User user) throws Exception;
-
-    @NonNull
-    Optional<User> getByEmail(@NonNull String email);
+    void update(User user)throws Exception;
 
     @NonNull
-    Optional<User> getByCellPhone(@NonNull String cellphone);
+    Optional<User> findByEmail(@NonNull String email);
+
+    @NonNull
+    Optional<User> findByCellPhone(@NonNull String cellphone);
+
+    void createUser(User user)throws Exception;
+
+    User findUserByJWT(String jwt) throws Exception;
 }

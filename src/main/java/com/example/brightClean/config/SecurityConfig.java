@@ -1,61 +1,64 @@
-// package com.example.brightClean.config;
+package com.example.brightClean.config;
 
-// import java.util.List;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-// import org.springframework.beans.factory.annotation.Value;
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.security.authentication.AuthenticationManager;
-// import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-// import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-// import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-// import org.springframework.security.core.userdetails.User;
-// import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.security.core.userdetails.UserDetailsService;
-// import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-// import org.springframework.security.crypto.password.PasswordEncoder;
-// import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-// import org.springframework.security.web.SecurityFilterChain;
+import com.example.brightClean.util.JWTAuthenticationFilter;
 
-// import com.example.brightClean.service.impl.JwtService;
+import java.util.Arrays;
 
-// @Configuration
-// @EnableWebSecurity
-// public class SecurityConfig {
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
 
-//     @Bean
-//     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-//         return httpSecurity
-//                 .csrf(csrf -> csrf.disable())
-//                 .authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
-//                 .build();
-//     }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 啟用 CORS
+                .csrf(csrf -> csrf.disable()) // 禁用 CSRF
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 無狀態會話
+                .addFilterBefore(new JWTAuthenticationFilter(), BasicAuthenticationFilter.class) // 增加 JWT 過濾器
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/user/login", "/user/register", "/product/**").permitAll() // 公開路徑
+                        .requestMatchers("/cart/**").authenticated() // 需驗證的路徑
+                        .anyRequest().permitAll());
 
-//     @Bean
-//     public UserDetailsService inMemoryUserDetailsManager() {
-//         UserDetails user = User
-//                 .withUsername("user1")
-//                 .password("111")
-//                 .authorities("STUDENT", "ASSISTANT")
-//                 .build();
-//         return new InMemoryUserDetailsManager(List.of(user));
-//     }
+        return httpSecurity.build();
+    }
 
-//     @Bean
-//     public PasswordEncoder passwordEncoder() {
-//         return NoOpPasswordEncoder.getInstance();
-//     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        // 設置允許的標頭
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        // 設置是否允許 Cookie
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-//     @Bean
-//     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
-//         return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).build();
-//     }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
+    }
 
-//     @Bean
-//     public JwtService jwtService(
-//             @Value("${jwt.secret-key}") String secretKeyStr,
-//             @Value("${jwt.valid-seconds}") int validSeconds
-//     ) {
-//         return new JwtService(secretKeyStr, validSeconds);
-//     }
-// }
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).build();
+    }
+}

@@ -11,7 +11,7 @@ import com.example.brightClean.repository.ProductRepository;
 import com.example.brightClean.service.ProductService;
 
 @Service
-public class ProductServiceimpl implements ProductService {
+public class ProductServiceimpl implements ProductService{
 
     @Autowired
     private ProductRepository productRepository;
@@ -22,12 +22,12 @@ public class ProductServiceimpl implements ProductService {
     }
 
     @Override
-    public Optional<Product> getProduct(Integer id) {
-        return productRepository.findById(id);
+    public Optional<Product> findProductById(int id) {
+       return productRepository.findById(id);
     }
 
     @Override
-    public List<Product> getAll() {
+    public List<Product> findProducts() {
         return productRepository.findAll();
     }
 
@@ -36,5 +36,16 @@ public class ProductServiceimpl implements ProductService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
+    
+    @Override
+    public List<Product> findProductsByType(String type) {
+        return productRepository.findProductByType(type);
+    }
 
+    @Override
+    public List<Product> findProductsBySalses() {
+        return productRepository.findAllByOrderBySalesDesc();
+    }
+
+    
 }
