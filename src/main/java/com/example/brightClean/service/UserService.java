@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import com.example.brightClean.domain.User;
+import com.example.brightClean.domain.params.UserParam;
 
 public interface UserService {
      
@@ -32,7 +33,7 @@ public interface UserService {
     @NonNull
     Optional<User> findByCellPhone(@NonNull String cellphone);
 
-    void createUser(User user)throws Exception;
+    void createUser(UserParam userParam)throws Exception;
 
     User findUserByJWT(String jwt) throws Exception;
 }

@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.brightClean.domain.User;
+import com.example.brightClean.domain.params.UserParam;
 import com.example.brightClean.exception.NotFoundException;
 import com.example.brightClean.repository.UserRepository;
 import com.example.brightClean.service.UserService;
@@ -82,7 +83,7 @@ public class UserServiceimpl implements UserService{
     //     return (UserDetails) user;
     // }
 
-    public void createUser(User user) throws Exception {
+    public void createUser(UserParam userParam) throws Exception {
         // User isEmailExists = userRepository.findByEmail(user.getEmail()).orElseThrow();
 
         // if(isEmailExists != null) {
@@ -90,12 +91,12 @@ public class UserServiceimpl implements UserService{
         // }
 
         User createdUser = new User();
-        createdUser.setName(user.getName());
-        createdUser.setAccount(user.getAccount());
-        createdUser.setEmail(user.getEmail());
-        createdUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        createdUser.setCellphone(user.getCellphone());
-        createdUser.setAddress(user.getAddress());
+        createdUser.setName(userParam.getName());
+        createdUser.setAccount(userParam.getAccount());
+        createdUser.setEmail(userParam.getEmail());
+        createdUser.setPassword(passwordEncoder.encode(userParam.getPassword()));
+        createdUser.setCellphone(userParam.getCellPhone());
+        createdUser.setAddress(userParam.getAddress());
 
         userRepository.save(createdUser);
     }

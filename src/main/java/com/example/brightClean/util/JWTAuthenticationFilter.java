@@ -22,7 +22,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
 
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
@@ -30,22 +29,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String jwt = null;
+        String jwt = request.getHeader("Authorization");
+        System.out.println("Authorization Header: " + jwt); // 調試輸出
 
-        // 從 Cookie 中提取 JWT
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("jwt".equals(cookie.getName())) {
-                    jwt = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        System.out.println("JWT from Cookie: " + jwt); // 調試輸出
-
-        if (jwt != null) {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // 移除 'Bearer ' 前綴
             try {
                 SecretKey key = Keys.hmacShaKeyFor(JWTConstant.SECRET.getBytes());
                 JwtParser parser = Jwts.parserBuilder().setSigningKey(key).build();
@@ -62,7 +50,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            System.out.println("No JWT in Cookie or Incorrect Cookie Format"); // 調試輸出
+            System.out.println("No JWT or Incorrect Header Format"); // 調試輸出
         }
 
         filterChain.doFilter(request, response);

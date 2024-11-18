@@ -3,7 +3,6 @@ package com.example.brightClean.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,27 +29,20 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    // 尋找使用者的購物車
+    //尋找使用者的購物車
     @GetMapping("/")
-    public ResponseEntity<Cart> findUserCart(@CookieValue(name = "jwt", required = false) String jwt) throws Exception {
-        if (jwt == null || jwt.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Cart> findUserCart(@RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserByJWT(jwt);
         Cart cart = cartService.calcCartTotal(user.getId());
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
-    // 增加商品到購物車
+    //增加商品到購物車
     @PutMapping("/add")
-    public ResponseEntity<String> addItemToCart(@RequestBody AddItemRequest req,
-            @CookieValue(name = "jwt", required = false) String jwt) throws Exception {
-        if (jwt == null || jwt.isEmpty()) {
-            return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<String> addItemToCart(@RequestBody AddItemRequest req,@RequestHeader("Authorization") String jwt) throws Exception{
         User user = userService.findUserByJWT(jwt);
         cartService.addToCart(user.getId(), req);
-        return new ResponseEntity<>("Item added to cart", HttpStatus.OK);
+        return new ResponseEntity<>("Item added to cart",HttpStatus.OK);
     }
 
 }

@@ -29,11 +29,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 啟用 CORS
                 .csrf(csrf -> csrf.disable()) // 禁用 CSRF
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 無狀態會話
-                .addFilterBefore(new JWTAuthenticationFilter(), BasicAuthenticationFilter.class) // 增加 JWT 過濾器
+                .addFilterBefore(new JWTAuthenticationFilter(), BasicAuthenticationFilter.class)//增加filter過濾 jwttoken
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/user/register", "/product/**").permitAll() // 公開路徑
-                        .requestMatchers("/cart/**").authenticated() // 需驗證的路徑
+                        .requestMatchers("/user/login", "/user/register", "/user/forget", "/product/**").permitAll()//通過
+                        .requestMatchers("/cart/**","/user/forget/**").authenticated()//需驗證
                         .anyRequest().permitAll());
+                
 
         return httpSecurity.build();
     }
@@ -41,12 +42,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        // 設置允許的標頭
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-        // 設置是否允許 Cookie
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
